@@ -15,20 +15,31 @@ SQLite3 uses the following cycle to execute SQL commands:
     connection.close()          //closes connection
 """
 
-debugging_mode = False
-
-import sqlite3 
+#filename to store db
 database_filename = "BryanElectronics.db"
+
+
+
+#delete database for recreation if in debugging mode
+import os
+debugging_mode = False
+if debugging_mode:
+    os.remove(database_filename)
+
+
+
+
+
+#establish connection to db in order to execute sql commands
+import sqlite3 
 connection = sqlite3.connect(database_filename) 
 cursor = connection.cursor() 
 
-import product_tables
 
+#build tables
+import product_tables
 product_tables.create_product_tables(cursor)
 connection.commit() 
-
-
-
 
   
 # close the connection 
@@ -38,6 +49,5 @@ connection.close()
 
 
 #delete db between runs while debugging
-import os
 if debugging_mode:
     os.remove(database_filename)

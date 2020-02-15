@@ -5,10 +5,6 @@
 #Prof.:         Dr. Bo Li
 
 #uses tutorial found at https://www.geeksforgeeks.org/sql-using-python/
-
-import sqlite3 
-connection = sqlite3.connect("BryanElectronics.db") 
-
 """
 SQLite3 uses the following cycle to execute SQL commands:
     connection = sqlite3.connect("BryanElectronics.db")     //establishes DB file
@@ -19,34 +15,29 @@ SQLite3 uses the following cycle to execute SQL commands:
     connection.close()          //closes connection
 """
 
-# cursor  
-crsr = connection.cursor() 
-  
-# SQL command to create a table in the database 
-sql_command = str("CREATE TABLE resistors ( " +
-                  "object_id INTEGER PRIMARY KEY, " +
-                  "model VARCHAR(30), " +
-                  "wattage INTEGER, " +
-                  "" +
-                  ");")
+debugging_mode = False
 
-  
-# execute the statement 
-crsr.execute(sql_command) 
-  
-# SQL command to insert the data in the table 
-sql_command = """INSERT INTO emp VALUES (23, "Rishabh", "Bansal", "M", "2014-03-28");"""
-crsr.execute(sql_command) 
-  
-# another SQL command to insert the data in the table 
-sql_command = """INSERT INTO emp VALUES (1, "Bill", "Gates", "M", "1980-10-28");"""
-crsr.execute(sql_command) 
-  
-# To save the changes in the files. Never skip this.  
-# If we skip this, nothing will be saved in the database. 
+import sqlite3 
+database_filename = "BryanElectronics.db"
+connection = sqlite3.connect(database_filename) 
+cursor = connection.cursor() 
+
+import product_tables
+
+product_tables.create_product_tables(cursor)
 connection.commit() 
+
+
+
+
   
 # close the connection 
 connection.close() 
 
 
+
+
+#delete db between runs while debugging
+import os
+if debugging_mode:
+    os.remove(database_filename)

@@ -20,12 +20,12 @@ database_filename = "BryanElectronics.db"
 
 
 
-#delete database for recreation if in debugging mode
+#delete database for recreation when in debugging mode
 import os
-debugging_mode = False
+debugging_mode = True
 if debugging_mode:
     os.remove(database_filename)
-
+#
 
 
 
@@ -44,6 +44,7 @@ connection.commit()
   
 # close the connection 
 connection.close() 
+
 
 
 

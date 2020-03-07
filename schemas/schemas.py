@@ -14,25 +14,16 @@ import relation
 import glob #used to scan folder for files
 
 def import_schemas(f_folder):
-    """returns a list of filenames of each file in parameterized folder""" #TODO, update to build tables
+    """returns a list of relations built from each file in parameterized folder"""
+    new_relations = []
 
     #get filenames from parameterized folder
     files = glob.glob(str(".\\" + f_folder + "\\*.csv"))
-    file_names = []
-    new_relations = []
 
-    #format to remove path and extension
+    #build new relation from each file
     for each_file in files:
-        
-        #file_names.append(str(each_file.replace(
-        #    str(".\\" + f_folder + "\\"), "").replace(".csv", "")))
-        #print(each_file)
-
         this_relation = relation.Relation(each_file)
-        #this_relation.print_me()
-
         new_relations.append(this_relation)
-
     #
 
     #return list of filenames as strings

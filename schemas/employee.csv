@@ -1,1 +1,2 @@
-id,first_name,last_name,ssn,phone_number,address_number,address_street,address_city,address_zip,password,job_title,db_permission_level,start_date,end_date,vacation_days_remaining,contract_id
+id;first_name;last_name;ssn;phone_number;address_number;address_street;address_city;address_zip;password;job_title;db_permission_level;start_date;end_date;vacation_days_remaining;contract_id
+int;varchar(255);varchar(255);int;int;int;varchar(255);varchar(255);int;varchar(255);varchar(32);varchar(32);date;date;int;int

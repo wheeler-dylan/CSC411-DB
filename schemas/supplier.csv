@@ -1,1 +1,2 @@
 id,name,address_number,address_street,address_city,address_zip,email,phone_number
+int;varchar(255);int;varchar(255);varchar(255);int;varchar(255);int

@@ -1,1 +1,2 @@
-id,date,supplier,employee_id,itemization_id,grand_total
+id;date;supplier_id;employee_id;itemization_id;grand_total
+int;date;int;int;int;float(64,2)

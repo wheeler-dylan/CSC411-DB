@@ -1,1 +1,2 @@
-id,name,category,supplier_id,stock,damaged_lost,store_price,sold_last_month,sold_last_year
+id;name;category;supplier_id;stock;damaged_lost;store_price;sold_last_month;sold_last_year
+int;varchar(255);varchar(255);int;int;int;float(16,2);int;int

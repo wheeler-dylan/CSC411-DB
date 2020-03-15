@@ -15,20 +15,23 @@ SQLite3 uses the following cycle to execute SQL commands:
     connection.close()          //closes connection
 """
 
+
+
+
+import sys
+sys.path.append("./schemas")
+import schemas
+schemas_list = schemas.import_schemas("schemas")
+
 #filename to store db
 database_filename = "BryanElectronics.db"
 
-
-
-#delete database for recreation if in debugging mode
+#delete database for recreation when in debugging mode
 import os
 debugging_mode = False
 if debugging_mode:
     os.remove(database_filename)
-
-
-
-
+#
 
 #establish connection to db in order to execute sql commands
 import sqlite3 
@@ -36,14 +39,15 @@ connection = sqlite3.connect(database_filename)
 cursor = connection.cursor() 
 
 
-#build tables
-import product_tables
-product_tables.create_product_tables(cursor)
-connection.commit() 
+#############################################################
 
-  
-# close the connection 
-connection.close() 
+for each_table in schemas_list:
+    each_table.print_me()
+    cursor.execute(each_table.get_query())
+#
+
+#contract = schemas_list[0]
+#print(contract.get_query())
 
 
 

@@ -1,0 +1,2 @@
+id;model;brand;type;price;amps;volts;blow_type
+int;varchar(255);varchar(255);varchar(255);float(12,2);float(12,2);float(12,2);varchar(255)

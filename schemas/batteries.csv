@@ -1,0 +1,2 @@
+id;model;brand;type;price;quantity;voltage
+int;varchar(255);varchar(255);varchar(255);float(12,2);int;float(12,2)

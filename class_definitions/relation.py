@@ -12,6 +12,10 @@ class Relation:
         self.file = open(f_file)
         self.attributes = self.file.readline().split(";") #header names
         self.filetypes = self.file.readline().split(";")  #sql calls for datatypes
+        for each_attribute in self.attributes:
+            each_attribute = each_attribute.replace("\n","")
+        for each_filetype in self.filetypes:
+            each_filetype = each_filetype.replace("\n","")
     #
 
     def print_me(self):

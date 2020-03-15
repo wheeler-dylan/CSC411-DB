@@ -20,6 +20,7 @@ SQLite3 uses the following cycle to execute SQL commands:
 
 import sys
 sys.path.append("./schemas")
+sys.path.append("./class_definitions")
 import schemas
 schemas_list = schemas.import_schemas("schemas")
 

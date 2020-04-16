@@ -1,2 +1,2 @@
-id;first_name;last_name;middle_initial;wage_type;wage_amount;pay_frequency;overtime_rate;vacation_days_alloted;vacation_days_frequency
-int;varchar(255);varchar(255);varchar(1);varchar(16);float(12,2);varchar(16);float(4,2);int;varchar(16)
+id;employee_id;first_name;last_name;wage_type;wage_amount;pay_frequency;overtime_rate;vacation_days_alloted;vacation_days_frequency
+int;int;varchar(255);varchar(255);varchar(16);float(12,2);varchar(16);float(4,2);int;varchar(16)

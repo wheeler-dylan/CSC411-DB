@@ -20,16 +20,17 @@ SQLite3 uses the following cycle to execute SQL commands:
 
 import sys
 sys.path.append("./schemas")
+sys.path.append("./class_definitions")
 import schemas
-schemas_list = schemas.import_schemas("schemas")
+import foreign_keys
 
 #filename to store db
 database_filename = "BryanElectronics.db"
 
 #delete database for recreation when in debugging mode
 import os
-debugging_mode = False
-if debugging_mode:
+debugging = True
+if debugging:
     os.remove(database_filename)
 #
 
@@ -41,17 +42,15 @@ cursor = connection.cursor()
 
 #############################################################
 
-for each_table in schemas_list:
-    each_table.print_me()
-    cursor.execute(each_table.get_query())
+#build tables
+for each_table in schemas.import_schemas("schemas"):
+    try:
+        each_table.print_me()
+        cursor.execute(each_table.get_query())
+    except sqlite3.Error as error:
+        print("Error building tables from schemas folder:")
+        print(error)
+        if debugging:
+            input("Press ENTER to continue...\n")
 #
 
-#contract = schemas_list[0]
-#print(contract.get_query())
-
-
-
-
-#delete db between runs while debugging
-if debugging_mode:
-    os.remove(database_filename)

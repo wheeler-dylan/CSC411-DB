@@ -19,13 +19,8 @@ class Relation:
 
         #check for foreign key
         self.contains_fk = False
-        self.fk_column = None
-        self.fk_reference = None
-
         if self.name in foreign_keys.fk_index.keys():
             self.contains_fk = True
-            self.fk_column = foreign_keys.fk_index[self.name][0]
-            self.fk_reference = foreign_keys.fk_index[self.name][1]
     #
 
     def print_me(self):
@@ -33,7 +28,7 @@ class Relation:
         print(self.attributes)
         print(self.filetypes)
         if self.contains_fk:
-            print("Foreign Key: ", end="")
+            print("Foreign Keys: ", end="")
             print(foreign_keys.fk_index[self.name])
         print("\n\n\n")
     #
@@ -55,8 +50,9 @@ class Relation:
 
         #configure foreign key if found
         if self.contains_fk:
-            query = str(query + ", FOREIGN KEY (" + str(foreign_keys.fk_index[self.name][0]) +
-                        ") REFERENCES " + str(foreign_keys.fk_index[self.name][1]) + "(id)" )
+            for each_key in foreign_keys.fk_index[self.name]:
+                query = str(query + ", FOREIGN KEY (" + str(each_key[0]) +
+                            ") REFERENCES " + str(each_key[1]) + "(id)" )
 
         query = query + ");" #end query
 

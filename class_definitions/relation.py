@@ -76,8 +76,6 @@ class Relation:
         query = query[:-2] #remove last comma and space
         query = query + ");\n"
 
-        print(query) #debugging
-
         return query
     #
     

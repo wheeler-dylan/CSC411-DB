@@ -44,6 +44,7 @@ cursor = connection.cursor()
 
 #build tables
 tables_list = schemas.import_schemas("schemas")
+print()
 for each_table in tables_list.values():
     try:
         each_table.print_me()
@@ -69,6 +70,8 @@ for each_table in tables_list.values():
         print(cells) #debugging
         
         try:
+            if debugging:
+                print(each_table.get_tuple_query(cells))
             cursor.execute(each_table.get_tuple_query(cells))
         except sqlite3.Error as error:
             print("Error importing tuples from data file " + filename + ":")
@@ -77,6 +80,6 @@ for each_table in tables_list.values():
             if debugging:
                 input("Press ENTER to continue...\n")
     #
-    print("\n")
+    print("")
 
 print("End of main.py")

@@ -8,6 +8,7 @@ import sys
 sys.path.append("./class_definitions")
 import foreign_keys
 
+
 class Relation:
     """class to aid in table building for sql queries"""
 
@@ -23,18 +24,21 @@ class Relation:
             self.contains_fk = True
     #
 
+
     def print_me(self):
+        """outputs object attributes (for debugging)"""
         print(self.name)
         print(self.attributes)
         print(self.filetypes)
         if self.contains_fk:
             print("Foreign Keys: ", end="")
             print(foreign_keys.fk_index[self.name])
-        print("\n\n\n")
     #
 
+
     def get_query(self):
-        query = str("create table " + self.name + " (")
+        """builds table creation SQL query"""
+        query = str("CREATE TABLE " + self.name + " (")
         for i in range(len(self.attributes)):            
             
             #add attribute name to query
@@ -42,7 +46,7 @@ class Relation:
 
             #if first query, designate as primary key
             if i == 0:
-                query = query + " primary key"
+                query = query + " PRIMARY KEY"
             
             #if not last query, add comma
             if i != (len(self.attributes)-1):
@@ -59,5 +63,23 @@ class Relation:
         return query
     #
 
+
+    def get_tuple_query(self, f_tuple):
+        """converts parameterized list of values into a sql query"""
+
+        query = str("INSERT INTO " + self.name + " VALUES (")
+
+        for each_cell in f_tuple: #add each cell to query
+            query = query + "'" + str(each_cell) + "', "
+        #
+
+        query = query[:-2] #remove last comma and space
+        query = query + ");\n"
+
+        print(query) #debugging
+
+        return query
+    #
+    
 #
 

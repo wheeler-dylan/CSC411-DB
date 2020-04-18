@@ -43,14 +43,45 @@ cursor = connection.cursor()
 #############################################################
 
 #build tables
-for each_table in schemas.import_schemas("schemas"):
+tables_list = schemas.import_schemas("schemas")
+print()
+for each_table in tables_list.values():
     try:
         each_table.print_me()
+        if debugging:
+            print(each_table.get_query())
         cursor.execute(each_table.get_query())
     except sqlite3.Error as error:
         print("Error building tables from schemas folder:")
         print(error)
         if debugging:
             input("Press ENTER to continue...\n")
+
+    print("\n")
 #
 
+#import data
+for each_table in tables_list.values():
+    filename = str(".\\data\\" + each_table.name + ".csv")
+    this_file = open(filename, 'r')
+    print(each_table.name)
+    for each_line in this_file:
+        cells = each_line.rstrip('\n').split(";")
+        print(cells) #debugging
+        
+        try:
+            if debugging:
+                print(each_table.get_tuple_query(cells))
+            cursor.execute(each_table.get_tuple_query(cells))
+        except sqlite3.Error as error:
+            print("Error importing tuples from data file " + filename + ":")
+            print("tuple data: " + str(each_line)) 
+            print(error)
+            if debugging:
+                input("Press ENTER to continue...\n")
+    #
+    print("")
+
+connection.commit()
+connection.close()
+print("End of main.py")

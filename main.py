@@ -82,4 +82,6 @@ for each_table in tables_list.values():
     #
     print("")
 
+connection.commit()
+connection.close()
 print("End of main.py")

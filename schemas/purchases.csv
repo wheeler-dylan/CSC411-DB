@@ -1,2 +1,2 @@
-id;customer_id;cc_number;cc_expiration;item_id;price;total;date;receipt_number
-int;int;int;date;int;float(12,2);float(12,2);date;int
+id;customer_id;store_id;cc_number;cc_expiration;item_id;price;total;date;receipt_number
+int;int;int;int;date;int;float(12,2);float(12,2);date;int

@@ -26,13 +26,3 @@ class User():
 default_users = {}
 default_users["DEFAULT_DBAdmin"] = User("employee", 4434430001, ["omniuser"], "DEFAULT_DBAdmin", "8Q@3^r`{;@AV#g_z")
 
-
-def find_user(f_username):
-    #search default users
-    if f_username in default_users:
-        return default_users[f_username]
-
-    #search employees
-    #TODO
-
-    #search 

@@ -28,26 +28,21 @@ import user
 import engine
 from engine import get_cmd
 import admin
+import manager
 
 #use formatted text colors if library is available
 try:
     import colorama
-    import termcolor
-    """example:
-    print('\033[31m' + 'some red text')
-    print('\033[39m') # and reset to default color
-    """
 except Exception as error:
     print("Color library not found.")
     print(error)
     print("In your python command line window, try entering:")
     print("\tpip install colorama")
-    print("\tpip install termcolor")
-    color_mode = False
+    cm = False
 else:
     colorama.init()
     from colorama import Fore, Back, Style
-    color_mode = True
+    cm = True
 #
 
 #filename to store db
@@ -65,9 +60,9 @@ debugging = True
 import os
 if debugging:
     
-    debugging_username = "DEFAULT_DBAdmin"
-    debugging_password = "8Q@3^r`{;@AV#g_z"
-    debugging_usertype = "default"
+    debugging_username = "gkavel"
+    debugging_password = "WrongLever21"
+    debugging_usertype = "manager"
 
     #delete database for recreation when in debugging mode
     connection.close()
@@ -128,9 +123,9 @@ connection.commit()
 username = ""
 password = ""
 active_user = None
-print( (Back.MAGENTA) if color_mode else "", end="")
+print( (Back.MAGENTA) if cm else "", end="")
 print("Welcome to Bryan Electronics Database Management System!")
-print( (Back.RESET) if color_mode else "", end="")
+print( (Back.RESET) if cm else "", end="")
 
 #find username
 user_found = False
@@ -185,7 +180,6 @@ while not password_found:
     if user_type == "default":
         if password == user.default_users[username].password:
             password_found = True
-            active_user = user.default_users[username]
             continue
 
     elif user_type in ["admin", "manager", "associate"]:
@@ -211,15 +205,20 @@ engine.clear_screen()
 print("Welcome " + str(username) + "!")
 
 if user_type in ["default", "admin"]:
+    active_user = user.default_users[username]
     admin.admin_interface(connection, active_user)
 elif user_type == "manager":
-    manager.manager_interface(connection)
+    #this_id = int(cursor.execute("SELECT id FROM employee WHERE username='" + username + "';").fetchall()[0][0])
+    this_id = int(engine.get_cell(connection, "id", "employee", "username", username))
+    active_user = user.User("manager", this_id, "manager", username, password)
+    this_first_name = str(cursor.execute("SELECT first_name FROM employee WHERE username='" + username + "';").fetchall()[0][0])
+    manager.manager_interface(connection, active_user)
 elif user_type == "associate":
     associate.associate_interface(connection)
 elif user_type == "customer":
     customer.customer_interface(connection)
 else:
-    pass
+    print("Critical error in main.py: invalid user_type.")
 
 connection.commit()
 connection.close()

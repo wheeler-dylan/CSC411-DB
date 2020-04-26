@@ -9,18 +9,13 @@ import os
 #use formatted text colors if library is available
 try:
     import colorama
-    import termcolor
-    """example:
-    print('\033[31m' + 'some red text')
-    print('\033[39m') # and reset to default color
-    """
 except Exception as error:
     print(error)
-    color_mode = False
+    cm = False
 else:
     colorama.init()
     from colorama import Fore, Back, Style
-    color_mode = True
+    cm = True
 #
 
 
@@ -42,9 +37,9 @@ def get_cmd(f_prompt = ""):
         automatically formats the text color 
         to avoid duplicate code elsewhere"""
     print(f_prompt)
-    print((Fore.YELLOW if color_mode else ""))
+    print((Fore.YELLOW if cm else ""))
     cmd = input()
-    print((Fore.RESET if color_mode else ""), end="")
+    print((Fore.RESET if cm else ""), end="")
     return cmd
 #
 
@@ -63,7 +58,7 @@ def print_cursor_fetch(f_fetch, f_headers = None):
         calls in a formatted way for readability""" 
     if f_headers != None:
         for each_attribute in [i[0] for i in f_headers]:
-            print((Fore.CYAN if color_mode else "") + set_length(each_attribute) + (Fore.RESET if color_mode else ""), end=" ")
+            print((Fore.CYAN if cm else "") + set_length(each_attribute) + (Fore.RESET if cm else ""), end=" ")
         print()
     for each_tuple in f_fetch:
         for each_cell in each_tuple:
@@ -73,5 +68,10 @@ def print_cursor_fetch(f_fetch, f_headers = None):
 
 
 
-#def check_unique(f_conn, f_table, f_attribute = "id"):
-    """searches the db for a value value from a table"""
+def get_cell(f_conn, f_attribute, f_table, f_condition, f_query):
+    """searches the db for a single cell value from a table
+        must be formatted outside the function call with str(), int(), etc"""
+    cursor = f_conn.cursor()
+    return (cursor.execute("SELECT " + f_attribute + " FROM " +
+                           f_table + " WHERE " + f_condition + 
+                           " ='" + f_query + "';").fetchall()[0][0])

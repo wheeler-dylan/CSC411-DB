@@ -60,7 +60,7 @@ cursor = connection.cursor()
 
 
 ###################### DEBUGGING MODE #######################
-debugging = False
+debugging = True
 
 import os
 if debugging:

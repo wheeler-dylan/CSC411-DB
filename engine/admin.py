@@ -120,8 +120,33 @@ def admin_interface(conn, user):
                     print("Invalid command entered.")
 
             print(bar)
+        #end employ mode
 
+        #view all orders
+        elif command == "orders":
+            print(bar)
+            engine.print_cursor_fetch(cursor.execute("SELECT * FROM orders ORDER BY date DESC").fetchall(), cursor.description)
+            print(bar)
+        #
 
+        #view besetsellers
+        elif command == "bestsellers":
+            print(bar)
+            store_ids = [i[0] for i in cursor.execute("SELECT id FROM stores;")]
+
+            for each_store in store_ids:
+                engine.print_cursor_fetch(cursor.execute("SELECT * FROM inventory WHERE store_id='" + str(each_store) +
+                                                         "' ORDER BY sold_last_month DESC LIMIT 3").fetchall(), cursor.description)
+
+            print(bar)
+        #
+
+        #view losses
+        elif command == "losses":
+            print(bar)
+            engine.print_cursor_fetch(cursor.execute("SELECT * FROM inventory ORDER BY damaged_lost DESC LIMIT 3").fetchall(), cursor.description)
+            print(bar)
+        #
 
         else:
             print("Invalid command entered.")

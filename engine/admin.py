@@ -29,7 +29,7 @@ else:
 
 ###############################################################################
 
-def default_interface(conn, user):
+def admin_interface(conn, user):
     cursor = conn.cursor()
 
     engine.print_cursor_fetch(cursor.execute("SELECT * FROM inventory").fetchall(), cursor.description) #debugging

@@ -24,5 +24,5 @@ class User():
 #
 
 default_users = {}
-default_users["DEFAULT_DBAdmin"] = User("employee", 4434430001, ["omniuser"], "DEFAULT_DBAdmin", "8Q@3^r`{;@AV#g_z")
+default_users["DEFAULT_DBAdmin"] = User("employee", 4434430001, "admin", "DEFAULT_DBAdmin", "8Q@3^r`{;@AV#g_z")
 

@@ -26,7 +26,29 @@ import schemas
 import foreign_keys
 import user
 import engine
+from engine import get_cmd
 import default
+
+#use formatted text colors if library is available
+try:
+    import colorama
+    import termcolor
+    """example:
+    print('\033[31m' + 'some red text')
+    print('\033[39m') # and reset to default color
+    """
+except Exception as error:
+    print("Color library not found.")
+    print(error)
+    print("In your python command line window, try entering:")
+    print("\tpip install colorama")
+    print("\tpip install termcolor")
+    color_mode = False
+else:
+    colorama.init()
+    from colorama import Fore, Back, Style
+    color_mode = True
+#
 
 #filename to store db
 database_filename = "BryanElectronics.db"
@@ -43,6 +65,10 @@ debugging = True
 import os
 if debugging:
     
+    debugging_username = "DEFAULT_DBAdmin"
+    debugging_password = "8Q@3^r`{;@AV#g_z"
+    debugging_usertype = "default"
+
     #delete database for recreation when in debugging mode
     connection.close()
     os.remove(database_filename)
@@ -102,13 +128,22 @@ connection.commit()
 username = ""
 password = ""
 active_user = None
+print( (Back.MAGENTA) if color_mode else "", end="")
 print("Welcome to Bryan Electronics Database Management System!")
+print( (Back.RESET) if color_mode else "", end="")
 
 #find username
 user_found = False
 user_type = ""
+
+if debugging:
+    username = debugging_username
+    user_type = debugging_usertype
+    user_found = True
+#
+
 while not user_found:
-    username = input("Please enter your username:\n")
+    username = get_cmd("Please enter your username:\n")
     
     #search default users
     if username in user.default_users.keys():
@@ -136,8 +171,15 @@ while not user_found:
 
 #after username has been found, enter password
 password_found = False
+
+if debugging:
+    password = debugging_password
+    password_found = True
+    get_cmd("DEBUGGING MODE: Press ENTER to continue...")
+#
+
 while not password_found:
-    password = input("Please enter your password:\n")
+    password = get_cmd("Please enter your password:\n")
 
     if user_type == "default":
         if password == user.default_users[username].password:

@@ -43,7 +43,8 @@ def admin_interface(conn, user):
                        (Fore.GREEN if cm else "") + "pay" + (Fore.RESET if cm else "") + ": issue paychecks\n" +
                        (Fore.GREEN if cm else "") + "losses" + (Fore.RESET if cm else "") + ": check for lost or broken items\n" +
                        (Fore.GREEN if cm else "") + "suppliers" + (Fore.RESET if cm else "") + ": alter suppliers and shippers\n" +
-                       (Fore.GREEN if cm else "") + "SQL" + (Fore.RESET if cm else "") + ": enter SQL query mode\n") 
+                       (Fore.GREEN if cm else "") + "SQL" + (Fore.RESET if cm else "") + ": enter SQL query mode\n" +
+                       "") 
     print(command_list)
 
 
@@ -51,7 +52,7 @@ def admin_interface(conn, user):
 
         command = get_cmd()
 
-        if command == "exit":
+        if (engine.quit(command)):
             continue
 
         elif command == "help":
@@ -70,8 +71,7 @@ def admin_interface(conn, user):
                 query = input("Enter a SQL Query:\n")
                 print((Fore.RESET if cm else ""))
 
-                if query == "exit": 
-                    print("Now leaving SQL mode.")
+                if engine.quit(query, "Now leaving SQL mode."): 
                     print(command_list)
                     continue
             
@@ -87,6 +87,7 @@ def admin_interface(conn, user):
 
             #end while query != exit
             print(bar)
+            continue
         #End SQL mode
 
         #hire/fire mode
@@ -101,8 +102,7 @@ def admin_interface(conn, user):
 
                 mode = get_cmd()
 
-                if mode == "exit":
-                    print("Exiting employ mode, type help to see commands.")
+                if engine.quit(mode, "Exiting employ mode, type help to see commands."):
                     break
 
                 elif mode == "fire":
@@ -115,6 +115,7 @@ def admin_interface(conn, user):
                     print("Invalid command entered.")
 
             print(bar)
+            continue
         #end employ mode
 
         #view all orders
@@ -122,6 +123,7 @@ def admin_interface(conn, user):
             print(bar)
             engine.print_cursor_fetch(cursor.execute("SELECT * FROM orders ORDER BY date DESC").fetchall(), cursor.description)
             print(bar)
+            continue
         #
 
         #view besetsellers
@@ -134,6 +136,7 @@ def admin_interface(conn, user):
                                                          "' ORDER BY sold_last_month DESC LIMIT 3").fetchall(), cursor.description)
 
             print(bar)
+            continue
         #
 
         #view losses
@@ -141,6 +144,7 @@ def admin_interface(conn, user):
             print(bar)
             engine.print_cursor_fetch(cursor.execute("SELECT * FROM inventory ORDER BY damaged_lost DESC LIMIT 3").fetchall(), cursor.description)
             print(bar)
+            continue
         #
 
         else:
@@ -176,8 +180,7 @@ def fire_mode(conn, user = None):
 
     fired_id = get_cmd("Enter the employee ID to fire employee, or type cancel..")
 
-    if (fired_id == "cancel"):
-        print("Exiting fire mode.\n")
+    if engine.quit(fired_id, "Exiting fire mode."):
         return
 
     else:
@@ -239,8 +242,7 @@ def hire_mode(conn, user = None):
 
         new_id = get_cmd()
 
-        if new_id == "cancel":
-            print("Exiting hire mode.\n")
+        if engine.quit(new_id, "Exiting hire mode.\n"):
             return
 
         elif new_id == "random":
@@ -282,8 +284,7 @@ def hire_mode(conn, user = None):
         input = get_cmd("Enter " + (Fore.CYAN if cm else "") + each_attribute + (Fore.RESET if cm else "") +
                         " or " + (Fore.GREEN if cm else "") + "NULL" + (Fore.RESET if cm else "") + 
                         " if unknown, or enter " + (Fore.GREEN if cm else "") + "cancel" + (Fore.RESET if cm else ""))
-        if input == "cancel":
-            print("Exiting hire mode.\n")
+        if engine.quit(input,"Exiting hire mode."):
             return
         else:
             new_values = new_values + "'" + str(input) + "', "
@@ -299,8 +300,7 @@ def hire_mode(conn, user = None):
 
         new_username = get_cmd()
 
-        if new_username == "cancel":
-            print("Exiting hire mode.\n")
+        if engine.quit(new_username,"Exiting hire mode."):
             return
 
         elif new_username == "random":
@@ -334,8 +334,7 @@ def hire_mode(conn, user = None):
                         " or " + (Fore.GREEN if cm else "") + "NULL" + (Fore.RESET if cm else "") + 
                         " if unknown, or enter " + (Fore.GREEN if cm else "") + "cancel" + (Fore.RESET if cm else ""))
 
-        if input == "cancel":
-            print("Exiting hire mode.\n")
+        if engine.quit(input,"Exiting hire mode."):
             return
         else:
             new_values = new_values + "'" + str(input) + "', "
@@ -349,8 +348,7 @@ def hire_mode(conn, user = None):
                         (Fore.GREEN if cm else "") + "manager" + (Fore.RESET if cm else "") + "\n" +
                         (Fore.GREEN if cm else "") + "associate" + (Fore.RESET if cm else "") + "\n")
 
-        if input == "cancel":
-            print("Exiting hire mode.\n")
+        if engine.quit(input,"Exiting hire mode."):
             return
 
     #
@@ -364,8 +362,7 @@ def hire_mode(conn, user = None):
                         " or " + (Fore.GREEN if cm else "") + "NULL" + (Fore.RESET if cm else "") + 
                         " if unknown, or enter " + (Fore.GREEN if cm else "") + "cancel" + (Fore.RESET if cm else ""))  
             
-        if input == "cancel":
-            print("Exiting hire mode.\n")
+        if engine.quit(input,"Exiting hire mode."):
             return
         else:
             new_values = new_values + "'" + str(input) + "', "

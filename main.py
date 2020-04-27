@@ -60,9 +60,9 @@ debugging = True
 import os
 if debugging:
     
-    debugging_username = "BrownM"
-    debugging_password = "012346"
-    debugging_usertype = "manager"
+    debugging_username = "DEFAULT_DBAdmin"
+    debugging_password = "8Q@3^r`{;@AV#g_z"
+    debugging_usertype = "default"
 
     engine.debugging_mode(connection, database_filename)
 
@@ -160,29 +160,32 @@ engine.clear_screen()
 print("Welcome " + str(username) + "!")
 
 #if admin user
-if user_type in ["default", "admin"]:
+if user_type == "default":
     active_user = user.default_users[username]
     admin.admin_interface(connection, active_user) #open interface
 #
 
-#if manager
-elif user_type == "manager":
+#if employee
+elif user_type in ["admin", "manager", "associate"]:
     #configure user settings
     this_id = int(engine.get_cell(connection, "id", "employee", "username", username))
-    active_user = user.User("manager", this_id, "manager", username, password)
+    active_user = user.User(user_type, this_id, user_type, username, password)
 
     this_first_name = str(engine.get_cell(connection, "first_name", "employee", "username", username))
     this_last_name = str(engine.get_cell(connection, "last_name", "employee", "username", username))
     this_store_id = int(engine.get_cell(connection, "store_id", "employee", "username", username))
+    
     active_user.configure_employee(this_first_name, this_last_name, this_store_id)
 
     #open interface
-    manager.manager_interface(connection, active_user)
-#
-
-#if associate
-elif user_type == "associate":
-    associate.associate_interface(connection)
+    if user_type == "admin":
+        admin.admin_interface(connection, active_user)
+    elif user_type == "manager":
+        manager.manager_interface(connection, active_user)
+    elif user_type == "associate":
+        associate.associate_interface(connection, active_user)
+    else:
+        print("Critical error in main.py: invalid user_type.")
 #
 
 #if customer

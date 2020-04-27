@@ -60,62 +60,17 @@ debugging = True
 import os
 if debugging:
     
-    debugging_username = "gkavel"
-    debugging_password = "WrongLever21"
+    debugging_username = "BrownM"
+    debugging_password = "012346"
     debugging_usertype = "manager"
 
-    #delete database for recreation when in debugging mode
-    connection.close()
-    os.remove(database_filename)
+    engine.debugging_mode(connection, database_filename)
+
     connection = sqlite3.connect(database_filename) 
     cursor = connection.cursor() 
-    #
-
-    #build tables
-    tables_list = schemas.import_schemas("schemas")
-    print()
-    for each_table in tables_list.values():
-        try:
-            each_table.print_me()
-            if debugging:
-                print(each_table.get_query())
-            cursor.execute(each_table.get_query())
-        except sqlite3.Error as error:
-            print("Error building tables from schemas folder:")
-            print(error)
-            if debugging:
-                input("Press ENTER to continue...\n")
-
-        print("\n")
-    #
-
-    #import data
-    for each_table in tables_list.values():
-        filename = str(".\\data\\" + each_table.name + ".csv")
-        this_file = open(filename, 'r')
-        print(each_table.name)
-        for each_line in this_file:
-            cells = each_line.rstrip('\n').split(";")
-            print(cells) #debugging
-        
-            try:
-                if debugging:
-                    print(each_table.get_tuple_query(cells))
-                cursor.execute(each_table.get_tuple_query(cells))
-            except sqlite3.Error as error:
-                print("Error importing tuples from data file " + filename + ":")
-                print("tuple data: " + str(each_line)) 
-                print(error)
-                if debugging:
-                    input("Press ENTER to continue...\n")
-        #
-        print("")
-    #
-
-
-# end if debugging
 #################### END DEBUGGING MODE ####################
-connection.commit()
+
+
 
 
 
@@ -204,19 +159,37 @@ engine.clear_screen()
 
 print("Welcome " + str(username) + "!")
 
+#if admin user
 if user_type in ["default", "admin"]:
     active_user = user.default_users[username]
-    admin.admin_interface(connection, active_user)
+    admin.admin_interface(connection, active_user) #open interface
+#
+
+#if manager
 elif user_type == "manager":
-    #this_id = int(cursor.execute("SELECT id FROM employee WHERE username='" + username + "';").fetchall()[0][0])
+    #configure user settings
     this_id = int(engine.get_cell(connection, "id", "employee", "username", username))
     active_user = user.User("manager", this_id, "manager", username, password)
-    this_first_name = str(cursor.execute("SELECT first_name FROM employee WHERE username='" + username + "';").fetchall()[0][0])
+
+    this_first_name = str(engine.get_cell(connection, "first_name", "employee", "username", username))
+    this_last_name = str(engine.get_cell(connection, "last_name", "employee", "username", username))
+    this_store_id = int(engine.get_cell(connection, "store_id", "employee", "username", username))
+    active_user.configure_employee(this_first_name, this_last_name, this_store_id)
+
+    #open interface
     manager.manager_interface(connection, active_user)
+#
+
+#if associate
 elif user_type == "associate":
     associate.associate_interface(connection)
+#
+
+#if customer
 elif user_type == "customer":
     customer.customer_interface(connection)
+#
+
 else:
     print("Critical error in main.py: invalid user_type.")
 

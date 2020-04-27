@@ -27,7 +27,7 @@ else:
 def manager_interface(conn, user):
     cursor = conn.cursor()
 
-    engine.print_cursor_fetch(cursor.execute("SELECT * FROM inventory WHERE store_id = '" + user.store_id + "';").fetchall(), cursor.description)
+    engine.print_cursor_fetch(cursor.execute("SELECT * FROM inventory WHERE store_id = '" + str(user.store_id) + "';").fetchall(), cursor.description)
     print()
 
     bar = str("\n" + ("-" * 25) + "\n")
@@ -37,10 +37,10 @@ def manager_interface(conn, user):
                        "\t(commands are case sensitive)\n" +
                        (Fore.GREEN if cm else "") + "exit" + (Fore.RESET if cm else "") + ": exit the program\n" +
                        (Fore.GREEN if cm else "") + "help" + (Fore.RESET if cm else "") + ": display commands list\n" +
-                       (Fore.GREEN if cm else "") + "orders" + (Fore.RESET if cm else "") + ": view all orders made and amounts sold\n" +
+                       #(Fore.GREEN if cm else "") + "orders" + (Fore.RESET if cm else "") + ": view all orders made\n" +
                        (Fore.GREEN if cm else "") + "bestsellers" + (Fore.RESET if cm else "") + ": view best selling items at your location\n" +
                        (Fore.GREEN if cm else "") + "employ" + (Fore.RESET if cm else "") + ": hire or fire an associate\n" +
-                       (Fore.GREEN if cm else "") + "order" + (Fore.RESET if cm else "") + ": order new inventory items\n" +
+                       (Fore.GREEN if cm else "") + "order" + (Fore.RESET if cm else "") + ": view orders and order new inventory items\n" +
                        (Fore.GREEN if cm else "") + "stock" + (Fore.RESET if cm else "") + ": add received items to the inventory\n" +
                        "") 
     print(command_list)
@@ -75,10 +75,14 @@ def manager_interface(conn, user):
 
         elif command == "order":
             print(bar)
-            rorder_mode()
+            order_mode(conn, user)
             print(bar)
             continue
         #
+
+        else:
+            print("Invalid command entered.")
+            print(command_list)
     
     #End while command != exit
 
@@ -87,45 +91,95 @@ def manager_interface(conn, user):
 
 
 
-def order_mode():
-    engine.print_cursor_fetch(cursor.execute("SELECT * FROM inventory WHERE store_id='" + str(user.store_id) +
-                                                "' ORDER BY stock DESC").fetchall(), cursor.description)
+def order_mode(conn, user):
+    
+    cursor = conn.cursor()
+    command = ""
 
-    input = get_cmd("Would you like to reorder items? Enter " + 
-                    (Fore.GREEN if cm else "") + "YES" + (Fore.RESET if cm else "") + 
-                    ", all other input will cancel.")
+    while not engine.quit(command, "Exiting order mode."):
 
-    if input != "YES":
-        print("Exiting restock mode.\n")
-        return
+        command = get_cmd("\nSelect from the following commands:\n" +
+                          (Fore.GREEN if cm else "") + "orders" + (Fore.RESET if cm else "") + ": view recent orders\n" +
+                          (Fore.GREEN if cm else "") + "inventory" + (Fore.RESET if cm else "") + ": view current inventory by lowest stock\n" +
+                          (Fore.GREEN if cm else "") + "reorder" + (Fore.RESET if cm else "") + ": order more items\n" +
+                          (Fore.GREEN if cm else "") + "cancel" + (Fore.RESET if cm else "") + " exit order mode\n" +
+                          "")
 
-    #get inventory id for items to order
-    input = get_cmd("Enter the " + 
-                    (Fore.CYAN if cm else "") + "Inventory ID" + (Fore.RESET if cm else "") + 
-                    " of the item you'd like to restock.")
-
-    while input not in [i[0] for i in cursor.execute("SELECT id FROM inventory WHERE " +
-                                                     "id = '" + input + "';").fetchall()]: 
-        input = get_cmd("Inventory ID not found, please re-enter Inventory ID, or type "+ 
-                        (Fore.GREEN if cm else "") + "cancel" + (Fore.RESET if cm else "") + 
-                        " to cancel.") 
-
-        if (engine.quit(input), "Exiting restock mode."):
+        if engine.quit(command, "Exiting order mode."):
             return
 
-    #end while id not found
+        elif command == "orders":
+            engine.print_cursor_fetch(cursor.execute("SELECT * FROM orders WHERE store_id='" + str(user.store_id) +
+                                                     "' ORDER BY date DESC").fetchall(), cursor.description)
+            continue
 
-    #once id is found
-    restock_id = input
+        elif command == "inventory":
+            engine.print_cursor_fetch(cursor.execute("SELECT * FROM inventory WHERE store_id='" + str(user.store_id) +
+                                                     "' ORDER BY stock ASC").fetchall(), cursor.description)
+            continue
 
-    #get quantity
-    input = get_cmd("Enter the " + 
-                    (Fore.CYAN if cm else "") + "quantity" + (Fore.RESET if cm else "") + 
-                    " of the item you'd like to restock.")
+        elif command == "reorder":
+
+            #get inventory id for items to order
+            input = get_cmd("Enter the " + 
+                            (Fore.CYAN if cm else "") + "Inventory ID" + (Fore.RESET if cm else "") + 
+                            " of the item you'd like to restock.")
+
+            if (engine.quit(input, "Exiting restock mode.")):
+                return
 
 
+            while int(input) not in [i[0] for i in cursor.execute("SELECT id FROM inventory WHERE " +
+                                                             "id = '" + input + "';").fetchall()]: 
+                input = get_cmd("Inventory ID not found, please re-enter Inventory ID, or type "+ 
+                                (Fore.GREEN if cm else "") + "cancel" + (Fore.RESET if cm else "") + 
+                                " to cancel.") 
 
-#
+                if (engine.quit(input), "Exiting restock mode."):
+                    return
+
+            #end while id not found
+
+            #once id is found
+            reorder_id = int(input)
+
+            #get quantity
+            while True:
+                try:
+                    input = get_cmd("Enter the " + 
+                                    (Fore.CYAN if cm else "") + "quantity" + (Fore.RESET if cm else "") + 
+                                    " of the item you'd like to restock.")
+
+                    if (engine.quit(input, "Exiting restock mode.")):
+                        return
+                    #
+
+                    input = int(input)
+
+                except ValueError as error:
+                    print("Error, please enter an integer.")
+                    continue
+
+                else:
+                    reorder_quantity = int(input)
+                    break 
+            
+
+
+            #TODO: implement itamization and format order
+
+            print("Ordering " + str(reorder_quantity) + " of item " + str(reorder_id) + "...")
+
+            continue
+        #end command = reorder
+
+        else:
+            print("Error, invalid command entered.")
+            continue
+
+    #End while
+
+#End order_mode()
 
 
 

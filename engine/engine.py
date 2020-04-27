@@ -5,6 +5,12 @@
 #Prof.:         Dr. Bo Li
 
 import os
+import sqlite3 
+
+import sys
+sys.path.append("./schemas")
+sys.path.append("./class_definitions")
+import schemas
 
 #use formatted text colors if library is available
 try:
@@ -17,6 +23,66 @@ else:
     from colorama import Fore, Back, Style
     cm = True
 #
+
+
+
+def debugging_mode(connection, database_filename):
+    #delete database for recreation when in debugging mode
+    connection.close()
+    os.remove(database_filename)
+    connection = sqlite3.connect(database_filename) 
+    cursor = connection.cursor() 
+    #
+
+    #build tables
+    tables_list = schemas.import_schemas("schemas")
+    print()
+    for each_table in tables_list.values():
+        try:
+            each_table.print_me()
+            
+            print((Fore.CYAN if cm else "") +
+                  str(each_table.get_query()) +
+                  (Fore.RESET if cm else ""))
+
+            cursor.execute(each_table.get_query())
+        except sqlite3.Error as error:
+            print((Fore.RED if cm else "") + 
+                  "Error building tables from schemas folder:" +
+                  (Fore.RESET if cm else ""))
+            print(error)
+            input("Press ENTER to continue...\n")
+
+        print("\n")
+    #
+
+    #import data
+    for each_table in tables_list.values():
+        filename = str(".\\data\\" + each_table.name + ".csv")
+        this_file = open(filename, 'r')
+        print((Fore.MAGENTA if cm else "") + str(each_table.name) + (Fore.RESET if cm else ""))
+        for each_line in this_file:
+            cells = each_line.rstrip('\n').split(";")
+            print(cells) #debugging
+        
+            try:
+                print((Fore.CYAN if cm else "") + 
+                      each_table.get_tuple_query(cells) + 
+                      (Fore.RESET if cm else ""))
+                cursor.execute(each_table.get_tuple_query(cells))
+            except sqlite3.Error as error:
+                print((Fore.RED if cm else "") + 
+                      "Error importing tuples from data file " + filename + ":" + 
+                      (Fore.RESET if cm else ""))
+                print("tuple data: " + str(each_line)) 
+                print(error)
+                input("Press ENTER to continue...\n")
+        #
+        print("")
+    #
+    connection.commit()
+# end debugging_mode()
+
 
 
 
@@ -82,7 +148,9 @@ def get_cell(f_conn, f_attribute, f_table, f_condition, f_query):
 def quit(f_input, f_message = ""):
     """checks input string for terms that indicate canceling
         a process and returns True if input matches one of those terms"""
-    if f_input in ["cancel", "exit"]:
+    if f_input in ["cancel", "exit", "close"]:
         print(f_message)
         return True
+    else:
+        return False
 #

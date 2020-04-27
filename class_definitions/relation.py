@@ -8,6 +8,18 @@ import sys
 sys.path.append("./class_definitions")
 import foreign_keys
 
+#use formatted text colors if library is available
+try:
+    import colorama
+except Exception as error:
+    print(error)
+    cm = False
+else:
+    colorama.init()
+    from colorama import Fore, Back, Style
+    cm = True
+#
+
 
 class Relation:
     """class to aid in table building for sql queries"""
@@ -27,7 +39,9 @@ class Relation:
 
     def print_me(self):
         """outputs object attributes (for debugging)"""
-        print(self.name)
+        print((Fore.MAGENTA if cm else "") + 
+              str(self.name) + 
+              (Fore.RESET if cm else ""))
         print(self.attributes)
         print(self.filetypes)
         if self.contains_fk:

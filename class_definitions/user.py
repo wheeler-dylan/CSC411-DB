@@ -13,8 +13,11 @@ class User():
         self.password = f_password
     #
 
-    def configure_employee(self):
-        pass
+    def configure_employee(self, f_first_name, f_last_name, f_store_id):
+        self.first_name = f_first_name
+        self.last_name = f_last_name
+        self.store_id = f_store_id
+    #
 
     def configure_customer(self):
         pass
@@ -24,5 +27,5 @@ class User():
 #
 
 default_users = {}
-default_users["DEFAULT_DBAdmin"] = User("employee", 4434430001, ["omniuser"], "DEFAULT_DBAdmin", "8Q@3^r`{;@AV#g_z")
+default_users["DEFAULT_DBAdmin"] = User("employee", 4434430001, "admin", "DEFAULT_DBAdmin", "8Q@3^r`{;@AV#g_z")
 

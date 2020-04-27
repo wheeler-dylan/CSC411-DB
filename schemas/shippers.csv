@@ -1,0 +1,2 @@
+id;shipper_name;shipper_account_number;phone_number;email;address_number;address_street_name;address_city;address_zip_code
+int;varchar(256);int;int;varchar(256);int;varchar(256);varchar(256);int;int

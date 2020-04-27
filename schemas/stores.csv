@@ -1,0 +1,2 @@
+id;manager_id;manager_first_name;manager_last_name;address_number;address_street_name;address_city;address_zip_code;phone_number
+int;int;varchar(256);varchar(256);int;varchar(256);varchar(256);int;int

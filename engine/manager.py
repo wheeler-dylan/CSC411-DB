@@ -115,15 +115,16 @@ def order_mode(conn, user):
             continue
 
         elif command == "details":
-            input = get_cmd("Enter the " + (Fore.CYAN if cm else "") + "Order ID" + (Fore.RESET if cm else "") + 
+            input = get_cmd("Enter the " + (Fore.CYAN if cm else "") + 
+                            "Order ID" + (Fore.RESET if cm else "") + 
                             " of the order you'd like to view.") 
 
             if (engine.quit(input, "Exiting order mode.")):
                 return
 
 
-            while int(input) not in [i[0] for i in cursor.execute("SELECT id FROM order WHERE " +
-                                                                  "id = '" + input + "';").fetchall()]: 
+            while int(input) not in [i[0] for i in cursor.execute("SELECT id FROM orders WHERE " +
+                                                                  "id = '" + str(input) + "';").fetchall()]: 
                 input = get_cmd("Order ID not found, please re-enter Order ID, or type "+ 
                                 (Fore.GREEN if cm else "") + "cancel" + (Fore.RESET if cm else "") + 
                                 " to cancel.") 
@@ -138,8 +139,9 @@ def order_mode(conn, user):
 
             #get itemization id
             try:
-                itemization_id = str(engine.get_cell(conn, "itemization_id", "order", "id", order_id))
-            except sqlite3.Error as Error:
+                itemization_id = str(engine.get_cell(conn, "itemization_id", "orders", "id", str(order_id)))
+                print("Loading itemized order list: " + itemization_id + "...")
+            except sqlite3.Error as error:
                 print((Fore.RED if cm else "") + 
                       "Error collecting Itemization ID from order table:" +
                       (Fore.RESET if cm else ""))
@@ -149,7 +151,9 @@ def order_mode(conn, user):
 
             else:
                 print("Displaying itemization details for Order " + str(order_id) + ":")
-                engine.print_cursor_fetch(cursor.execute("SELECT * FROM " + str(itemization_id)))
+                engine.print_cursor_fetch(cursor.execute("SELECT * FROM " + str(itemization_id)), cursor.description)
+
+
 
         #end command = details
 

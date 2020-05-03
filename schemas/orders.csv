@@ -1,2 +1,2 @@
 id;date;store_id;supplier_id;employee_id;itemization_id;grand_total
-int;date;int;int;int;int;float(64,2)
+int;date;int;int;int;varchar(255);float(64,2)

@@ -90,8 +90,88 @@ def debugging_mode(connection, database_filename):
     #
 
     #get itemization data
-    items = glob.glob(str(".\\itemization\\*.csv"))
-    for each_item in items:
+    itemization_list = glob.glob(str(".\\itemization\\*.csv"))
+
+    print(itemization_list)
+    for each_file in itemization_list:
+        try:
+            this_file = open(each_file, 'r')
+            table_name = str(each_file.replace(str(".\\itemization\\"), "").replace(".csv", ""))
+            attributes = ["id", "item_category", "item_id", "quantity", "price_each"]
+            filetypes = ["int", "varchar(255)", "int", "int", "float(12,2)"]
+
+            print((Fore.MAGENTA if cm else "") + str(table_name) + (Fore.RESET if cm else ""))
+
+            """builds table creation SQL query"""
+            query = str("CREATE TABLE " + table_name + " (")
+            for i in range(len(attributes)):            
+            
+                #add attribute name to query
+                query = query + (str(attributes[i] + " " + filetypes[i]))
+
+                #if first query, designate as primary key
+                if i == 0:
+                    query = query + " PRIMARY KEY"
+            
+                #if not last query, add comma
+                if i != (len(attributes)-1):
+                    query = query + ", "
+
+            query = query + ");" #end query
+
+            print((Fore.CYAN if cm else "") + 
+                  str(query) + 
+                  (Fore.RESET if cm else ""))
+
+            cursor.execute(query)
+
+            print()
+
+            #add data to teh table
+            for each_line in this_file:
+                cells = each_line.rstrip('\n').split(";")
+                print(cells) #debugging
+        
+                try:
+                    query = str("INSERT INTO " + table_name + " VALUES (")
+
+                    for each_cell in cells: #add each cell to query
+                        query = query + "'" + str(each_cell) + "', "
+                    #
+
+                    query = query[:-2] #remove last comma and space
+                    query = query + ");\n"
+
+                    print((Fore.CYAN if cm else "") + 
+                          str(query) + 
+                          (Fore.RESET if cm else ""))
+                    cursor.execute(query)
+
+                except sqlite3.Error as error:
+                    print((Fore.RED if cm else "") + 
+                          "Error importing tuples from data file " + filename + ":" + 
+                          (Fore.RESET if cm else ""))
+                    print("tuple data: " + str(each_line)) 
+                    print(error)
+                    input("Press ENTER to continue...\n")
+            #
+            print("")
+        except Exception as error:
+            print((Fore.RED if cm else "") + 
+                  "Error building tables from data folder:" +
+                  (Fore.RESET if cm else ""))
+            print(error)
+    #
+
+        except Exception as error:
+            print((Fore.RED if cm else "") + 
+                  "Error building tables from itemization folder:" +
+                  (Fore.RESET if cm else ""))
+            print(error)
+    #
+
+    """
+    for each_item in itemization_list:
         filename = str(each_item.replace(str(".\\itemization\\"), "").replace(".csv", ""))
         print("Converting " + str(filename) + ".csv to relation...")
         this_relation = relation.Relation(each_item, "itemization")
@@ -113,6 +193,8 @@ def debugging_mode(connection, database_filename):
 
         print()
     #
+    """
+
 
     connection.commit()
 # end debugging_mode()

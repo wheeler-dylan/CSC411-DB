@@ -1,2 +1,2 @@
 id;customer_id;store_id;cc_number;cc_expiration;itemization_id;grand_total;date
-int;int;int;int;date;int;float(12,2);date
+int;int;int;int;date;varchar(255);float(12,2);date

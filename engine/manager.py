@@ -8,6 +8,7 @@ import sqlite3
 import random
 import engine
 from engine import get_cmd
+import order
 
 #use formatted text colors if library is available
 try:
@@ -190,7 +191,6 @@ def order_mode(conn, user):
             continue
 
         elif command == "reorder":
-            import order
 
             order.reorder(conn, user)
 

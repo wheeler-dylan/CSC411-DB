@@ -30,7 +30,7 @@ def reorder(conn, user):
     #get inventory id for items to order
     input = get_cmd("Enter the " + 
                     (Fore.CYAN if cm else "") + "Inventory ID" + (Fore.RESET if cm else "") + 
-                    " of the item you'd like to restock.")
+                    " of the item you'd like to order.")
 
     if (engine.quit(input, "Exiting order mode.")):
         return
@@ -189,9 +189,79 @@ def reorder(conn, user):
                       (Fore.RESET if cm else ""))
                 print(error)
 
-    #TODO: implement itamization and format order
+#end reorder()
 
 
 
 
-    
+def restock(conn, user):
+    """restock items in inventory"""
+    cursor = conn.cursor()
+
+    engine.print_cursor_fetch(cursor.execute("SELECT * FROM inventory WHERE store_id='" + str(user.store_id) +
+                                             "' ORDER BY stock ASC").fetchall(), cursor.description)
+
+    #get inventory id for items to add
+    input = get_cmd("Enter the " + 
+                    (Fore.CYAN if cm else "") + "Inventory ID" + (Fore.RESET if cm else "") + 
+                    " of the item you'd like to restock.")
+
+    if (engine.quit(input, "Exiting order mode.")):
+        return
+
+
+    while int(input) not in [i[0] for i in cursor.execute("SELECT id FROM inventory WHERE " +
+                                                        "id = '" + input + "';").fetchall()]: 
+        input = get_cmd("Inventory ID not found, please re-enter Inventory ID, or type "+ 
+                        (Fore.GREEN if cm else "") + "cancel" + (Fore.RESET if cm else "") + 
+                        " to cancel.") 
+
+        if (engine.quit(input), "Exiting order mode."):
+            return
+
+    #end while id not found
+
+    #once id is found
+    restock_id = int(input)
+
+    #get quantity
+    while True:
+        try:
+            input = get_cmd("Enter the " + 
+                            (Fore.CYAN if cm else "") + "quantity" + (Fore.RESET if cm else "") + 
+                            " of the item you'd like to restock.")
+
+            if (engine.quit(input, "Exiting order mode.")):
+                return
+            #
+
+            input = int(input)
+
+        except ValueError as error:
+            print("Error, please enter an integer.")
+            continue
+
+        else:
+            restock_quantity = int(input)
+            break 
+    #end get quantity
+
+    restock_quantity = int( int(restock_quantity) + int(engine.get_cell(conn, "stock", "inventory", "id", restock_id)) )
+
+    try:
+        query = str("UPDATE inventory SET stock = '" + str(restock_quantity) + 
+                    "' WHERE id = '" + str(restock_id) + "';") 
+        cursor.execute(query)
+
+    except sqlite3.Error as error:
+        print((Fore.RED if cm else "") + 
+                "Error restocking inventory item " + str(restock_id) + ":" +
+                (Fore.RESET if cm else ""))
+        print(query)
+        print(error)
+
+    else:
+        print("Successfully added stock.")
+        engine.print_cursor_fetch(cursor.execute("SELECT * FROM inventory WHERE store_id='" + str(user.store_id) +
+                                                 "' ORDER BY stock ASC").fetchall(), cursor.description)
+#end restock()

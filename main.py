@@ -29,6 +29,7 @@ import engine
 from engine import get_cmd
 import admin
 import manager
+import associate
 
 #use formatted text colors if library is available
 try:

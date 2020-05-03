@@ -127,7 +127,7 @@ def debugging_mode(connection, database_filename):
 
             print()
 
-            #add data to teh table
+            #add data to the table
             for each_line in this_file:
                 cells = each_line.rstrip('\n').split(";")
                 print(cells) #debugging
@@ -156,12 +156,6 @@ def debugging_mode(connection, database_filename):
                     input("Press ENTER to continue...\n")
             #
             print("")
-        except Exception as error:
-            print((Fore.RED if cm else "") + 
-                  "Error building tables from data folder:" +
-                  (Fore.RESET if cm else ""))
-            print(error)
-    #
 
         except Exception as error:
             print((Fore.RED if cm else "") + 
@@ -169,31 +163,6 @@ def debugging_mode(connection, database_filename):
                   (Fore.RESET if cm else ""))
             print(error)
     #
-
-    """
-    for each_item in itemization_list:
-        filename = str(each_item.replace(str(".\\itemization\\"), "").replace(".csv", ""))
-        print("Converting " + str(filename) + ".csv to relation...")
-        this_relation = relation.Relation(each_item, "itemization")
-
-        try:
-            this_relation.print_me()
-            
-            print((Fore.CYAN if cm else "") +
-                  str(this_relation.get_query()) +
-                  (Fore.RESET if cm else ""))
-
-            cursor.execute(this_relation.get_query())
-        except sqlite3.Error as error:
-            print((Fore.RED if cm else "") + 
-                  "Error building tables from itemization folder:" +
-                  (Fore.RESET if cm else ""))
-            print(error)
-            input("Press ENTER to continue...\n")
-
-        print()
-    #
-    """
 
 
     connection.commit()
@@ -254,9 +223,9 @@ def get_cell(f_conn, f_attribute, f_table, f_condition, f_query):
     """searches the db for a single cell value from a table,
         must be formatted outside the function call with str(), int(), etc"""
     cursor = f_conn.cursor()
-    return (cursor.execute("SELECT " + f_attribute + " FROM " +
-                           f_table + " WHERE " + f_condition + 
-                           " ='" + f_query + "';").fetchall()[0][0])
+    return (cursor.execute("SELECT " + str(f_attribute) + " FROM " +
+                           str(f_table) + " WHERE " + str(f_condition) + 
+                           " ='" + str(f_query) + "';").fetchall()[0][0])
 #
 
 
@@ -270,3 +239,17 @@ def quit(f_input, f_message = ""):
     else:
         return False
 #
+
+
+def get_itemization_query(f_filename):
+    attributes = ["id", "item_category", "item_id", "quantity", "price_each"]
+    filetypes = ["int", "varchar(255)", "int", "int", "float(12,2)"]
+
+    query = str("CREATE TABLE " + str(f_filename) + " (" +
+                "id int PRIMARY KEY, " + 
+                "item_category varchar(255), " + 
+                "item_id int, " +
+                "quantity int, " + 
+                "price_each float(12,2)" +
+                ");")
+    return query

@@ -22,9 +22,9 @@ def import_schemas(f_folder):
 
     #build new relation from each file
     for each_file in files:
-        filename = str(each_file.replace(str(".\\schemas\\"), "").replace(".csv", ""))
+        filename = str(each_file.replace(str(".\\" + str(f_folder) + "\\"), "").replace(".csv", ""))
         print("Converting " + str(filename) + ".csv to relation...")
-        this_relation = relation.Relation(each_file)
+        this_relation = relation.Relation(each_file, f_folder)
         new_relations[filename] = this_relation
     #
     print()

@@ -1,0 +1,2 @@
+id;item_category;item_id;quantity;price_each
+int;varchar(255);int;int;float(12,2)

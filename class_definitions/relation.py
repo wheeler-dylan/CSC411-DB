@@ -24,8 +24,8 @@ else:
 class Relation:
     """class to aid in table building for sql queries"""
 
-    def __init__(self, f_file): #f_file is a formatted csv file found in shcemas folder
-        self.name = str(f_file.replace(str(".\\schemas\\"), "").replace(".csv", ""))
+    def __init__(self, f_file, f_folder): #f_file is a formatted csv file found in the f_folder
+        self.name = str(f_file.replace(str(".\\" + f_folder + "\\"), "").replace(".csv", ""))
         self.file = open(f_file)
         self.attributes = self.file.readline().rstrip('\n').split(";") #header names
         self.filetypes = self.file.readline().rstrip('\n').split(";")  #sql calls for datatypes

@@ -6,11 +6,13 @@
 
 import os
 import sqlite3 
+import glob
 
 import sys
 sys.path.append("./schemas")
 sys.path.append("./class_definitions")
 import schemas
+import relation
 
 #use formatted text colors if library is available
 try:
@@ -58,28 +60,142 @@ def debugging_mode(connection, database_filename):
 
     #import data
     for each_table in tables_list.values():
-        filename = str(".\\data\\" + each_table.name + ".csv")
-        this_file = open(filename, 'r')
-        print((Fore.MAGENTA if cm else "") + str(each_table.name) + (Fore.RESET if cm else ""))
-        for each_line in this_file:
-            cells = each_line.rstrip('\n').split(";")
-            print(cells) #debugging
+        try:
+            filename = str(".\\data\\" + each_table.name + ".csv")
+            this_file = open(filename, 'r')
+            print((Fore.MAGENTA if cm else "") + str(each_table.name) + (Fore.RESET if cm else ""))
+            for each_line in this_file:
+                cells = each_line.rstrip('\n').split(";")
+                print(cells) #debugging
         
-            try:
-                print((Fore.CYAN if cm else "") + 
-                      each_table.get_tuple_query(cells) + 
-                      (Fore.RESET if cm else ""))
-                cursor.execute(each_table.get_tuple_query(cells))
-            except sqlite3.Error as error:
-                print((Fore.RED if cm else "") + 
-                      "Error importing tuples from data file " + filename + ":" + 
-                      (Fore.RESET if cm else ""))
-                print("tuple data: " + str(each_line)) 
-                print(error)
-                input("Press ENTER to continue...\n")
-        #
-        print("")
+                try:
+                    print((Fore.CYAN if cm else "") + 
+                          each_table.get_tuple_query(cells) + 
+                          (Fore.RESET if cm else ""))
+                    cursor.execute(each_table.get_tuple_query(cells))
+                except sqlite3.Error as error:
+                    print((Fore.RED if cm else "") + 
+                          "Error importing tuples from data file " + filename + ":" + 
+                          (Fore.RESET if cm else ""))
+                    print("tuple data: " + str(each_line)) 
+                    print(error)
+                    input("Press ENTER to continue...\n")
+            #
+            print("")
+        except Exception as error:
+            print((Fore.RED if cm else "") + 
+                  "Error building tables from data folder:" +
+                  (Fore.RESET if cm else ""))
+            print(error)
     #
+
+    #get itemization data
+    itemization_list = glob.glob(str(".\\itemization\\*.csv"))
+
+    print(itemization_list)
+    for each_file in itemization_list:
+        try:
+            this_file = open(each_file, 'r')
+            table_name = str(each_file.replace(str(".\\itemization\\"), "").replace(".csv", ""))
+            attributes = ["id", "item_category", "item_id", "quantity", "price_each"]
+            filetypes = ["int", "varchar(255)", "int", "int", "float(12,2)"]
+
+            print((Fore.MAGENTA if cm else "") + str(table_name) + (Fore.RESET if cm else ""))
+
+            """builds table creation SQL query"""
+            query = str("CREATE TABLE " + table_name + " (")
+            for i in range(len(attributes)):            
+            
+                #add attribute name to query
+                query = query + (str(attributes[i] + " " + filetypes[i]))
+
+                #if first query, designate as primary key
+                if i == 0:
+                    query = query + " PRIMARY KEY"
+            
+                #if not last query, add comma
+                if i != (len(attributes)-1):
+                    query = query + ", "
+
+            query = query + ");" #end query
+
+            print((Fore.CYAN if cm else "") + 
+                  str(query) + 
+                  (Fore.RESET if cm else ""))
+
+            cursor.execute(query)
+
+            print()
+
+            #add data to teh table
+            for each_line in this_file:
+                cells = each_line.rstrip('\n').split(";")
+                print(cells) #debugging
+        
+                try:
+                    query = str("INSERT INTO " + table_name + " VALUES (")
+
+                    for each_cell in cells: #add each cell to query
+                        query = query + "'" + str(each_cell) + "', "
+                    #
+
+                    query = query[:-2] #remove last comma and space
+                    query = query + ");\n"
+
+                    print((Fore.CYAN if cm else "") + 
+                          str(query) + 
+                          (Fore.RESET if cm else ""))
+                    cursor.execute(query)
+
+                except sqlite3.Error as error:
+                    print((Fore.RED if cm else "") + 
+                          "Error importing tuples from data file " + filename + ":" + 
+                          (Fore.RESET if cm else ""))
+                    print("tuple data: " + str(each_line)) 
+                    print(error)
+                    input("Press ENTER to continue...\n")
+            #
+            print("")
+        except Exception as error:
+            print((Fore.RED if cm else "") + 
+                  "Error building tables from data folder:" +
+                  (Fore.RESET if cm else ""))
+            print(error)
+    #
+
+        except Exception as error:
+            print((Fore.RED if cm else "") + 
+                  "Error building tables from itemization folder:" +
+                  (Fore.RESET if cm else ""))
+            print(error)
+    #
+
+    """
+    for each_item in itemization_list:
+        filename = str(each_item.replace(str(".\\itemization\\"), "").replace(".csv", ""))
+        print("Converting " + str(filename) + ".csv to relation...")
+        this_relation = relation.Relation(each_item, "itemization")
+
+        try:
+            this_relation.print_me()
+            
+            print((Fore.CYAN if cm else "") +
+                  str(this_relation.get_query()) +
+                  (Fore.RESET if cm else ""))
+
+            cursor.execute(this_relation.get_query())
+        except sqlite3.Error as error:
+            print((Fore.RED if cm else "") + 
+                  "Error building tables from itemization folder:" +
+                  (Fore.RESET if cm else ""))
+            print(error)
+            input("Press ENTER to continue...\n")
+
+        print()
+    #
+    """
+
+
     connection.commit()
 # end debugging_mode()
 

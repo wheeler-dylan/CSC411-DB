@@ -56,9 +56,10 @@ def associate_interface(conn, user):
         #
 
         elif command == "checkout":
-            print(command_list)
+            order.checkout(conn, user)
             continue
-        #
+        #end command == checkout
+
 
         elif command == "order":
             engine.print_cursor_fetch(cursor.execute("SELECT * FROM inventory WHERE store_id='" + str(user.store_id) +
@@ -79,3 +80,4 @@ def associate_interface(conn, user):
     #End while command != exit
 
 #end associate_interface()
+                    

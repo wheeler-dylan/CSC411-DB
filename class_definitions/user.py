@@ -19,7 +19,10 @@ class User():
         self.store_id = f_store_id
     #
 
-    def configure_customer(self):
+    def configure_customer(self, f_first_name, f_last_name):
+        self.first_name = f_first_name
+        self.last_name = f_last_name
+        self.store_id = 0
         pass
 
     def add_to_table(self):

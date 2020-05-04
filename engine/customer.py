@@ -1,6 +1,6 @@
 #Author:        Dylan E. Wheeler
 #Email:         dylan.wheeler@usm.edu
-#Date:          2019 04 26
+#Date:          2019 05 03
 #Course:        CSC411 - Intro to Databases
 #Prof.:         Dr. Bo Li
 
@@ -25,7 +25,7 @@ else:
 
 ###############################################################################
 
-def associate_interface(conn, user):
+def customer_interface(conn, user):
     cursor = conn.cursor()
 
     bar = str("\n" + ("-" * 25) + "\n")
@@ -35,9 +35,8 @@ def associate_interface(conn, user):
                        "\t(commands are case sensitive)\n" +
                        (Fore.GREEN if cm else "") + "exit" + (Fore.RESET if cm else "") + ": exit the program\n" +
                        (Fore.GREEN if cm else "") + "help" + (Fore.RESET if cm else "") + ": display commands list\n" +
-                       (Fore.GREEN if cm else "") + "checkout" + (Fore.RESET if cm else "") + ": checkout a customer\n" +
-                       (Fore.GREEN if cm else "") + "order" + (Fore.RESET if cm else "") + ": view orders and order new inventory items\n" +
-                       (Fore.GREEN if cm else "") + "stock" + (Fore.RESET if cm else "") + ": add received items to the inventory\n" +
+                       (Fore.GREEN if cm else "") + "checkout" + (Fore.RESET if cm else "") + ": purchase items\n" +
+                       (Fore.GREEN if cm else "") + "inventory" + (Fore.RESET if cm else "") + ": view items available for purchase\n" +
                        "") 
     print(command_list)
 
@@ -61,18 +60,9 @@ def associate_interface(conn, user):
             continue
         #end command == checkout
 
-
-        elif command == "order":
+        elif command == "inventory":
             engine.print_cursor_fetch(cursor.execute("SELECT * FROM inventory WHERE store_id='" + str(user.store_id) +
-                                      "' ORDER BY stock ASC").fetchall(), cursor.description)
-            order.reorder(conn, user)
-            print(command_list)
-            continue
-        #
-
-        elif command == "stock":
-            order.restock(conn, user)
-            print(command_list)
+                                                     "' ORDER BY sold_last_month DESC").fetchall(), cursor.description)
             continue
         #
 
@@ -82,5 +72,5 @@ def associate_interface(conn, user):
     
     #End while command != exit
 
-#end associate_interface()
+#end customer_interface()
                     

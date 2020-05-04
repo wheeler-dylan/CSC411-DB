@@ -23,6 +23,8 @@ else:
     cm = True
 #
 
+
+
 def reorder(conn, user):
 
     cursor = conn.cursor()
@@ -211,7 +213,7 @@ def restock(conn, user):
 
 
     while int(input) not in [i[0] for i in cursor.execute("SELECT id FROM inventory WHERE " +
-                                                        "id = '" + input + "';").fetchall()]: 
+                                                          "id = '" + input + "';").fetchall()]: 
         input = get_cmd("Inventory ID not found, please re-enter Inventory ID, or type "+ 
                         (Fore.GREEN if cm else "") + "cancel" + (Fore.RESET if cm else "") + 
                         " to cancel.") 
@@ -270,6 +272,7 @@ def restock(conn, user):
 
 
 def checkout(conn, user):
+    cursor = conn.cursor()
     cart = []
     grand_total = 0.00
 
@@ -293,14 +296,17 @@ def checkout(conn, user):
             break
 
         elif int(input) not in [i[0] for i in cursor.execute("SELECT id FROM inventory WHERE " +
-                                                                "id = '" + input + "';").fetchall()]:
+                                                             "id = '" + input + "';").fetchall()]:
             print((Fore.RED if cm else "") + 
-                    "Error: inventory item " + str(this_order_id) + " not found." +
-                    (Fore.RESET if cm else ""))
+                  "Error: inventory item " + str(input) + " not found." +
+                  (Fore.RESET if cm else ""))
             continue #got to top of input loop
 
         else: #not done, not exit, and inventory item is found; add to list
-            cart.appennd(input)
+            cart.append(input)
+            print("Item " + 
+                  (Fore.GREEN if cm else "") + input + (Fore.RESET if cm else "") + 
+                  " added to purchase!")
 
     if input == "_BREAKLOOP_": #if canceling purchase
         return #break out of checkout mode
@@ -315,14 +321,15 @@ def checkout(conn, user):
     if (engine.quit(input, "Exiting checkout mode.")):
         return
     elif (input.lower() == "no"):
-        customer_ID = "NULL"
+        customer_id = "NULL"
     else:
+        customer_id = input
         while int(input) not in [i[0] for i in cursor.execute("SELECT id FROM customer WHERE " +
                                                 "id = '" + input + "';").fetchall()]: 
             input = get_cmd("Customer ID not found, please re-enter Customer ID, or type "+ 
                             (Fore.GREEN if cm else "") + "cancel" + (Fore.RESET if cm else "") + 
                             " to cancel.") 
-
+            customer_id = input
             if (engine.quit(input), "Not using Customer ID, get CC info."):
                 customer_id = "NULL"
                 break
@@ -352,7 +359,7 @@ def checkout(conn, user):
 
     elif input == "account": 
         customer_cc = str(engine.get_cell(conn, "card_number", "customer", "id", customer_id))
-        customer_cc_exp = str(engine.get_cell(conn, "cardexp", "customer", "id", customer_id))
+        customer_cc_exp = str(engine.get_cell(conn, "card_exp", "customer", "id", customer_id))
 
     else:
         print((Fore.RED if cm else "") + 
@@ -402,7 +409,7 @@ def checkout(conn, user):
                             str(this_row_id) + "', '" +    
                             str(this_row_category) + "', '" +  
                             str(this_row_item_id) + "', '" +  
-                            str(reorder_quantity) + "', '" +      
+                            str("1") + "', '" +      
                             str(this_row_price) +
                             "');")
 
@@ -424,8 +431,8 @@ def checkout(conn, user):
         try:
             #get unique order id
             while True:
-                this_order_id = random.randint(11111111, 99999999)
-                if this_order_id in [i[0] for i in cursor.execute("SELECT id FROM purchases;")]:
+                this_purchase_id = random.randint(11111111, 99999999)
+                if this_purchase_id in [i[0] for i in cursor.execute("SELECT id FROM purchases;")]:
                     continue #if exists, try again
                 else:
                     break #if unique, move on
@@ -438,7 +445,7 @@ def checkout(conn, user):
             """
 
             query = str("INSERT INTO purchases VALUES ('" +
-                        str(this_order_id) + "', '" +    
+                        str(this_purchase_id) + "', '" +    
                         str(customer_id) + "', '" + #TODO: get customer ID
                         str(user.store_id) + "', '" + 
                         str(customer_cc) + "', '" +
@@ -448,14 +455,19 @@ def checkout(conn, user):
                         str(date.today()) +  
                         "');")
 
-            print("Ordering " + str(reorder_quantity) + " of item " + 
-                    str(engine.get_cell(conn, "name", "inventory", "id", reorder_id)) +
-                    "...")
+            for each_item in cart:
+                print("Buying item " + 
+                      str(engine.get_cell(conn, "name", "inventory", "id", each_item)) +
+                      "...")
             print(query)    #debugging
             cursor.execute(query)
 
         except sqlite3.Error as error:
             print((Fore.RED if cm else "") + 
-                    "Error populating puchases table for " + str(this_order_id) + ":" +
-                    (Fore.RESET if cm else ""))
+                  "Error populating puchases table for " + str(this_purchase_id) + ":" +
+                  (Fore.RESET if cm else ""))
             print(error)
+
+    print("\nGrand total for the purchase is:\n" + (Fore.GREEN if cm else "") + 
+          "$" + str(round(grand_total,2)) + (Fore.RESET if cm else "") + "\n")
+#end checkout()

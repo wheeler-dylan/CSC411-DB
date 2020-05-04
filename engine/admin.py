@@ -40,7 +40,7 @@ def admin_interface(conn, user):
                        (Fore.GREEN if cm else "") + "orders" + (Fore.RESET if cm else "") + ": view all orders made and amounts sold\n" +
                        (Fore.GREEN if cm else "") + "bestsellers" + (Fore.RESET if cm else "") + ": view best selling items by location\n" +
                        (Fore.GREEN if cm else "") + "employ" + (Fore.RESET if cm else "") + ": hire or fire a manager or associate\n" +
-                       (Fore.GREEN if cm else "") + "pay" + (Fore.RESET if cm else "") + ": issue paychecks\n" +
+                       #(Fore.GREEN if cm else "") + "pay" + (Fore.RESET if cm else "") + ": issue paychecks\n" +
                        (Fore.GREEN if cm else "") + "losses" + (Fore.RESET if cm else "") + ": check for lost or broken items\n" +
                        (Fore.GREEN if cm else "") + "suppliers" + (Fore.RESET if cm else "") + ": alter suppliers and shippers\n" +
                        (Fore.GREEN if cm else "") + "SQL" + (Fore.RESET if cm else "") + ": enter SQL query mode\n" +
@@ -129,12 +129,12 @@ def admin_interface(conn, user):
         #view besetsellers
         elif command == "bestsellers":
             print(bar)
-            store_ids = [i[0] for i in cursor.execute("SELECT id FROM stores;")]
 
+            store_ids = [i[0] for i in cursor.execute("SELECT id FROM stores;")]
             for each_store in store_ids:
                 engine.print_cursor_fetch(cursor.execute("SELECT * FROM inventory WHERE store_id='" + str(each_store) +
-                                                         "' ORDER BY sold_last_month DESC LIMIT 3").fetchall(), cursor.description)
-
+                                                         "' ORDER BY sold_last_month DESC LIMIT 10").fetchall(), cursor.description)
+                print()
             print(bar)
             continue
         #
@@ -142,7 +142,12 @@ def admin_interface(conn, user):
         #view losses
         elif command == "losses":
             print(bar)
-            engine.print_cursor_fetch(cursor.execute("SELECT * FROM inventory ORDER BY damaged_lost DESC LIMIT 3").fetchall(), cursor.description)
+
+            store_ids = [i[0] for i in cursor.execute("SELECT id FROM stores;")]
+            for each_store in store_ids:
+                engine.print_cursor_fetch(cursor.execute("SELECT * FROM inventory WHERE store_id='" + str(each_store) +
+                                                         "' ORDER BY damaged_lost DESC LIMIT 10").fetchall(), cursor.description)            
+                print()
             print(bar)
             continue
         #
@@ -391,3 +396,75 @@ def hire_mode(conn, user = None):
 ###############################################################################
 
 #
+
+
+
+def edit_suppliers(conn, user):
+    cursor = conn.cursor()
+
+    command_list = str("select an option from the commands below:\n" +
+                       "\t(commands are case sensitive)\n" +
+                       (Fore.GREEN if cm else "") + "supp" + (Fore.RESET if cm else "") + ": view suppliers\n" +
+                       (Fore.GREEN if cm else "") + "add_supp" + (Fore.RESET if cm else "") + ": add a new supplier\n" +
+                       (Fore.GREEN if cm else "") + "remove_supp" + (Fore.RESET if cm else "") + ": remove a supplier\n" +
+                       (Fore.GREEN if cm else "") + "ship" + (Fore.RESET if cm else "") + ": view shippers\n" +
+                       (Fore.GREEN if cm else "") + "add_ship" + (Fore.RESET if cm else "") + ": add a new shipper\n" +
+                       (Fore.GREEN if cm else "") + "remove_ship" + (Fore.RESET if cm else "") + ": remove a shipper\n" +
+                       "") 
+    print(command_list)
+
+    while(command != "exit"):
+
+        command = get_cmd()
+
+        if (engine.quit(command)):
+            continue
+
+        elif command == "help":
+            print(command_list)
+            print()
+            continue
+
+        elif command == "supp":
+            engine.print_cursor_fetch(cursor.execute("SELECT * FROM supplier").fetchall(), cursor.description)
+            print()
+            continue
+        #
+
+        elif command == "add_supp":
+            continue
+
+        elif command == "remove_supp":
+            continue
+
+        elif command == "ship":
+            continue
+
+        elif command == "add_ship":
+            continue
+
+        elif command == "remove_ship":
+            continue
+
+
+
+
+    """from /schemas/employee.csv:
+        id;first_name;last_name;store_id;
+        ssn;phone_number;address_number;address_street;address_city;address_zip;
+        username;password;job_title;db_permission_level;
+        start_date;end_date;vacation_days_remaining;contract_id
+    """
+
+    next_attributes = ["password", "job title"]
+
+    for each_attribute in next_attributes:
+        input = get_cmd("Enter " + (Fore.CYAN if cm else "") + each_attribute + (Fore.RESET if cm else "") +
+                        " or " + (Fore.GREEN if cm else "") + "NULL" + (Fore.RESET if cm else "") + 
+                        " if unknown, or enter " + (Fore.GREEN if cm else "") + "cancel" + (Fore.RESET if cm else ""))
+
+        if engine.quit(input,"Exiting hire mode."):
+            return
+        else:
+            new_values = new_values + "'" + str(input) + "', "
+    #

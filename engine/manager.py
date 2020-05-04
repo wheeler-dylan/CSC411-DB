@@ -8,6 +8,7 @@ import sqlite3
 import random
 import engine
 from engine import get_cmd
+import order
 
 #use formatted text colors if library is available
 try:
@@ -63,7 +64,7 @@ def manager_interface(conn, user):
             print(bar)
 
             engine.print_cursor_fetch(cursor.execute("SELECT * FROM inventory WHERE store_id='" + str(user.store_id) +
-                                                     "' ORDER BY sold_last_month DESC LIMIT 3").fetchall(), cursor.description)
+                                                     "' ORDER BY sold_last_month DESC LIMIT 10").fetchall(), cursor.description)
 
             print(bar)
             continue
@@ -190,7 +191,6 @@ def order_mode(conn, user):
             continue
 
         elif command == "reorder":
-            import order
 
             order.reorder(conn, user)
 

@@ -40,7 +40,7 @@ def admin_interface(conn, user):
                        (Fore.GREEN if cm else "") + "orders" + (Fore.RESET if cm else "") + ": view all orders made and amounts sold\n" +
                        (Fore.GREEN if cm else "") + "bestsellers" + (Fore.RESET if cm else "") + ": view best selling items by location\n" +
                        (Fore.GREEN if cm else "") + "employ" + (Fore.RESET if cm else "") + ": hire or fire a manager or associate\n" +
-                       (Fore.GREEN if cm else "") + "pay" + (Fore.RESET if cm else "") + ": issue paychecks\n" +
+                       #(Fore.GREEN if cm else "") + "pay" + (Fore.RESET if cm else "") + ": issue paychecks\n" +
                        (Fore.GREEN if cm else "") + "losses" + (Fore.RESET if cm else "") + ": check for lost or broken items\n" +
                        (Fore.GREEN if cm else "") + "suppliers" + (Fore.RESET if cm else "") + ": alter suppliers and shippers\n" +
                        (Fore.GREEN if cm else "") + "SQL" + (Fore.RESET if cm else "") + ": enter SQL query mode\n" +
@@ -129,12 +129,12 @@ def admin_interface(conn, user):
         #view besetsellers
         elif command == "bestsellers":
             print(bar)
-            store_ids = [i[0] for i in cursor.execute("SELECT id FROM stores;")]
 
+            store_ids = [i[0] for i in cursor.execute("SELECT id FROM stores;")]
             for each_store in store_ids:
                 engine.print_cursor_fetch(cursor.execute("SELECT * FROM inventory WHERE store_id='" + str(each_store) +
-                                                         "' ORDER BY sold_last_month DESC LIMIT 3").fetchall(), cursor.description)
-
+                                                         "' ORDER BY sold_last_month DESC LIMIT 10").fetchall(), cursor.description)
+                print()
             print(bar)
             continue
         #
@@ -142,10 +142,21 @@ def admin_interface(conn, user):
         #view losses
         elif command == "losses":
             print(bar)
-            engine.print_cursor_fetch(cursor.execute("SELECT * FROM inventory ORDER BY damaged_lost DESC LIMIT 3").fetchall(), cursor.description)
+
+            store_ids = [i[0] for i in cursor.execute("SELECT id FROM stores;")]
+            for each_store in store_ids:
+                engine.print_cursor_fetch(cursor.execute("SELECT * FROM inventory WHERE store_id='" + str(each_store) +
+                                                         "' ORDER BY damaged_lost DESC LIMIT 10").fetchall(), cursor.description)            
+                print()
             print(bar)
             continue
         #
+
+        elif command == "suppliers":
+            print(bar)
+            edit_suppliers(conn, user)
+            print(bar)
+            continue
 
         else:
             print("Invalid command entered.")
@@ -200,7 +211,7 @@ def fire_mode(conn, user = None):
             try:
                 cursor.execute("DELETE FROM employee WHERE id='" + str(fired_id) + "'")
             except sqlite3.Error as error:
-                print("SQL Error found in default.py > fire_mode()\n" + error)
+                print("SQL Error found in admin.py > fire_mode()\n" + error)
             else:
                 print("Employee removed from database.\n")
                 engine.print_cursor_fetch(cursor.execute("SELECT " + attributes + " FROM employee").fetchall(), cursor.description)
@@ -391,3 +402,284 @@ def hire_mode(conn, user = None):
 ###############################################################################
 
 #
+
+
+
+def edit_suppliers(conn, user):
+    cursor = conn.cursor()
+
+    command_list = str("select an option from the commands below:\n" +
+                       "\t(commands are case sensitive)\n" +
+                       (Fore.GREEN if cm else "") + "supp" + (Fore.RESET if cm else "") + ": view suppliers\n" +
+                       (Fore.GREEN if cm else "") + "add_supp" + (Fore.RESET if cm else "") + ": add a new supplier\n" +
+                       (Fore.GREEN if cm else "") + "remove_supp" + (Fore.RESET if cm else "") + ": remove a supplier\n" +
+                       (Fore.GREEN if cm else "") + "ship" + (Fore.RESET if cm else "") + ": view shippers\n" +
+                       (Fore.GREEN if cm else "") + "add_ship" + (Fore.RESET if cm else "") + ": add a new shipper\n" +
+                       (Fore.GREEN if cm else "") + "remove_ship" + (Fore.RESET if cm else "") + ": remove a shipper\n" +
+                       "") 
+
+    command = ""
+
+    while(command != "exit"):
+        print(command_list)
+
+        command = get_cmd()
+
+        if (engine.quit(command)):
+            continue
+
+        elif command == "help":
+            print(command_list)
+            print()
+            continue
+
+        elif command == "supp":
+            engine.print_cursor_fetch(cursor.execute("SELECT * FROM supplier").fetchall(), cursor.description)
+            print()
+            continue
+        #
+
+        elif command == "add_supp":
+            
+            new_values = ""
+            
+            #get supplier ID
+            id_found = False
+            while not id_found:
+                print("You may type " + (Fore.GREEN if cm else "") + "cancel" + (Fore.RESET if cm else "") + " at any time.\n" +
+                      "Enter new " + (Fore.CYAN if cm else "") + "supplier ID" + (Fore.RESET if cm else "") +" or enter " +
+                      (Fore.GREEN if cm else "") + "random" + (Fore.RESET if cm else "") +
+                      " to generate a new unique id.") 
+
+                new_id = get_cmd()
+
+                if engine.quit(new_id, "Exiting suppliers mode.\n"):
+                    return
+
+                elif new_id == "random":
+                    while not id_found:
+                        new_id = random.randint(10001, 99998)
+                        if int(new_id) in [i[0] for i in cursor.execute("SELECT id FROM supplier")]:
+                            continue
+                        else:
+                            id_found = True
+
+                else:
+                    try:
+                        new_id = int(new_id)
+            
+                    except:
+                        print("ID must be an integer")
+                        continue
+            
+                    else:
+                        if int(new_id) in [i[0] for i in cursor.execute("SELECT id FROM supplier")]:
+                            print("ALERT: this ID already exists.\n")
+                        else: 
+                            id_found = True
+
+            #end get employee id
+
+            new_values = new_values + "'" + str(new_id) + "', "
+
+
+            """from /schemas/supplier.csv:
+                id;name;address_number;address_street;address_city;address_zip;email;phone_number
+                int;varchar(255);int;varchar(255);varchar(255);int;varchar(255);int
+            """
+
+            next_attributes = ["Name", "Street Number", "Street", "City", "Zip", "Contact Email", "Phone number"]
+
+            for each_attribute in next_attributes:
+                input = get_cmd("Enter " + (Fore.CYAN if cm else "") + each_attribute + (Fore.RESET if cm else "") +
+                                " or " + (Fore.GREEN if cm else "") + "NULL" + (Fore.RESET if cm else "") + 
+                                " if unknown, or enter " + (Fore.GREEN if cm else "") + "cancel" + (Fore.RESET if cm else ""))
+
+                if engine.quit(input,"Exiting suppliers mode."):
+                    return
+                else:
+                    new_values = new_values + "'" + str(input) + "', "
+            #
+
+            #remove last comma
+            new_values = new_values[:-2]
+
+            #add to database
+            print((Back.CYAN if cm else "") + "Adding new supplier to database..." + (Back.RESET if cm else ""))
+
+            try:
+                cursor.execute("INSERT INTO supplier VALUES (" + new_values + ");")
+            except sqlite3.Error as error:
+                print((Fore.RED if cm else "") + "ERROR: " + (Fore.RESET if cm else "") +
+                      "SQL error found in default.py > hire_mode():\n" + str(error))
+            else:
+                print("New supplier added!")
+                engine.print_cursor_fetch(cursor.execute("SELECT * FROM supplier WHERE id='" + str(new_id) + "'").fetchall(), cursor.description)
+
+            continue
+        #end command == add_supp
+        
+        
+        
+        elif command == "remove_supp":
+
+            engine.print_cursor_fetch(cursor.execute("SELECT * FROM supplier").fetchall(), cursor.description)
+            print()
+
+            removed_id = get_cmd("Enter the " +(Fore.RED if cm else "") + "Supplier ID " + (Fore.RESET if cm else "") +" of the supplier to remove")
+
+            if engine.quit(removed_id, "Exiting suppliers mode."):
+                return
+
+            else:
+                if int(removed_id) in [i[0] for i in cursor.execute("SELECT id FROM supplier")]:
+
+                    print((Fore.RED if cm else "") + "ATTENTION! " + (Fore.RESET if cm else "") +
+                          "You about to remove the following supplier from the database:")
+                    engine.print_cursor_fetch(cursor.execute("SELECT * FROM supplier WHERE id='" + str(removed_id) + "'").fetchall(), cursor.description)
+                    print()
+
+                    confirm = get_cmd("Enter YES to continue, any other input will cancel.")
+
+                    if (confirm != "YES"):
+                        print("Exiting suppliers mode.\n")
+                        return
+
+                    try:
+                        cursor.execute("DELETE FROM supplier WHERE id='" + str(removed_id) + "'")
+                    except sqlite3.Error as error:
+                        print("SQL Error found in admin.py > edit_suppliers()\n" + error)
+                    else:
+                        print("Supplier removed from database.\n")
+                        engine.print_cursor_fetch(cursor.execute("SELECT * FROM supplier").fetchall(), cursor.description)
+                        print()
+
+                else:
+                    print("Supplier ID not found.\n")
+            continue
+
+        elif command == "ship":
+            engine.print_cursor_fetch(cursor.execute("SELECT * FROM shippers").fetchall(), cursor.description)
+            print()
+            continue
+
+        elif command == "add_ship":
+
+            new_values = ""
+            
+            #get supplier ID
+            id_found = False
+            while not id_found:
+                print("You may type " + (Fore.GREEN if cm else "") + "cancel" + (Fore.RESET if cm else "") + " at any time.\n" +
+                      "Enter new " + (Fore.CYAN if cm else "") + "shipper ID" + (Fore.RESET if cm else "") +" or enter " +
+                      (Fore.GREEN if cm else "") + "random" + (Fore.RESET if cm else "") +
+                      " to generate a new unique id.") 
+
+                new_id = get_cmd()
+
+                if engine.quit(new_id, "Exiting suppliers mode.\n"):
+                    return
+
+                elif new_id == "random":
+                    while not id_found:
+                        new_id = random.randint(10001, 99998)
+                        if int(new_id) in [i[0] for i in cursor.execute("SELECT id FROM shippers")]:
+                            continue
+                        else:
+                            id_found = True
+
+                else:
+                    try:
+                        new_id = int(new_id)
+            
+                    except:
+                        print("ID must be an integer")
+                        continue
+            
+                    else:
+                        if int(new_id) in [i[0] for i in cursor.execute("SELECT id FROM shippers")]:
+                            print("ALERT: this ID already exists.\n")
+                        else: 
+                            id_found = True
+
+            #end get employee id
+
+            new_values = new_values + "'" + str(new_id) + "', "
+
+
+            """from /schemas/supplier.csv:
+                id;shipper_name;shipper_account_number;phone_number;email;address_number;address_street_name;address_city;address_zip_code
+                int;varchar(256);int;int;varchar(256);int;varchar(256);varchar(256);int;int
+            """
+
+            next_attributes = ["Name", "Account Number", "Phone number", "Contact Email", "Street Number", "Street", "City", "Zip"]
+
+            for each_attribute in next_attributes:
+                input = get_cmd("Enter " + (Fore.CYAN if cm else "") + each_attribute + (Fore.RESET if cm else "") +
+                                " or " + (Fore.GREEN if cm else "") + "NULL" + (Fore.RESET if cm else "") + 
+                                " if unknown, or enter " + (Fore.GREEN if cm else "") + "cancel" + (Fore.RESET if cm else ""))
+
+                if engine.quit(input,"Exiting suppliers mode."):
+                    return
+                else:
+                    new_values = new_values + "'" + str(input) + "', "
+            #
+
+            #remove last comma
+            new_values = new_values[:-2]
+
+            #add to database
+            print((Back.CYAN if cm else "") + "Adding new shipper to database..." + (Back.RESET if cm else ""))
+
+            try:
+                cursor.execute("INSERT INTO shippers VALUES (" + new_values + ");")
+            except sqlite3.Error as error:
+                print((Fore.RED if cm else "") + "ERROR: " + (Fore.RESET if cm else "") +
+                      "SQL error found in default.py > hire_mode():\n" + str(error))
+            else:
+                print("New shipper added!")
+                engine.print_cursor_fetch(cursor.execute("SELECT * FROM shippers WHERE id='" + str(new_id) + "'").fetchall(), cursor.description)
+
+            continue
+        #end command == add_ship
+
+        elif command == "remove_ship":
+
+            engine.print_cursor_fetch(cursor.execute("SELECT * FROM shippers").fetchall(), cursor.description)
+            print()
+
+            removed_id = get_cmd("Enter the " +(Fore.RED if cm else "") + "Shipper ID " + (Fore.RESET if cm else "") +" of the shipper to remove")
+
+            if engine.quit(removed_id, "Exiting suppliers mode."):
+                return
+
+            else:
+                if int(removed_id) in [i[0] for i in cursor.execute("SELECT id FROM shippers")]:
+
+                    print((Fore.RED if cm else "") + "ATTENTION! " + (Fore.RESET if cm else "") +
+                          "You about to remove the following shipper from the database:")
+                    engine.print_cursor_fetch(cursor.execute("SELECT * FROM shippers WHERE id='" + str(removed_id) + "'").fetchall(), cursor.description)
+                    print()
+
+                    confirm = get_cmd("Enter YES to continue, any other input will cancel.")
+
+                    if (confirm != "YES"):
+                        print("Exiting suppliers mode.\n")
+                        return
+
+                    try:
+                        cursor.execute("DELETE FROM shippers WHERE id='" + str(removed_id) + "'")
+                    except sqlite3.Error as error:
+                        print("SQL Error found in admin.py > edit_suppliers()\n" + error)
+                    else:
+                        print("Shipper removed from database.\n")
+                        engine.print_cursor_fetch(cursor.execute("SELECT * FROM shippers").fetchall(), cursor.description)
+                        print()
+
+                else:
+                    print("Shipper ID not found.\n")
+
+            continue
+#end edit_suppliers
+
+

@@ -29,6 +29,8 @@ import engine
 from engine import get_cmd
 import admin
 import manager
+import associate
+import customer
 
 #use formatted text colors if library is available
 try:
@@ -55,7 +57,7 @@ cursor = connection.cursor()
 
 
 ###################### DEBUGGING MODE #######################
-debugging = False
+debugging = True
 
 import os
 if debugging:
@@ -190,7 +192,12 @@ elif user_type in ["admin", "manager", "associate"]:
 
 #if customer
 elif user_type == "customer":
-    customer.customer_interface(connection)
+    this_id = int(engine.get_cell(connection, "id", "customer", "username", username))
+    active_user = user.User(user_type, this_id, user_type, username, password)
+    this_first_name = str(engine.get_cell(connection, "first_name", "customer", "username", username))
+    this_last_name = str(engine.get_cell(connection, "last_name", "customer", "username", username))
+    active_user.configure_customer(this_first_name, this_last_name)
+    customer.customer_interface(connection, active_user)
 #
 
 else:

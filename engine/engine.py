@@ -149,7 +149,7 @@ def debugging_mode(connection, database_filename):
 
                 except sqlite3.Error as error:
                     print((Fore.RED if cm else "") + 
-                          "Error importing tuples from data file " + filename + ":" + 
+                          "Error importing tuples from itemization file " + table_name + ":" + 
                           (Fore.RESET if cm else ""))
                     print("tuple data: " + str(each_line)) 
                     print(error)

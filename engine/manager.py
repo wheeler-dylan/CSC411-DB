@@ -46,12 +46,12 @@ def manager_interface(conn, user):
     print(command_list)
 
 
-    while(command != "exit"):
+    while True:
 
         command = get_cmd()
 
-        if command == "exit":
-            continue
+        if (engine.quit(command)):
+            break
         #
 
         elif command == "help":

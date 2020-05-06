@@ -233,7 +233,7 @@ def get_cell(f_conn, f_attribute, f_table, f_condition, f_query):
 def quit(f_input, f_message = ""):
     """checks input string for terms that indicate canceling
         a process and returns True if input matches one of those terms"""
-    if f_input in ["cancel", "exit", "close"]:
+    if f_input in ["cancel", "exit", "close", "back"]:
         print(f_message)
         return True
     else:

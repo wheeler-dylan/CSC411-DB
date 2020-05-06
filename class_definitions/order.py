@@ -446,7 +446,7 @@ def checkout(conn, user):
 
             query = str("INSERT INTO purchases VALUES ('" +
                         str(this_purchase_id) + "', '" +    
-                        str(customer_id) + "', '" + #TODO: get customer ID
+                        str(customer_id) + "', '" + 
                         str(user.store_id) + "', '" + 
                         str(customer_cc) + "', '" +
                         str(customer_cc_exp) + "', '" +      

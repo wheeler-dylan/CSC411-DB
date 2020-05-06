@@ -48,12 +48,12 @@ def admin_interface(conn, user):
     print(command_list)
 
 
-    while(command != "exit"):
+    while True:
 
         command = get_cmd()
 
         if (engine.quit(command)):
-            continue
+            break
 
         elif command == "help":
             print(command_list)
@@ -66,14 +66,14 @@ def admin_interface(conn, user):
                   "enter 'exit' to leave SQL mode.\n")
 
             query = ""
-            while query != "exit":
+            while not engine.quit(query):
                 print((Fore.YELLOW if cm else ""))
                 query = input("Enter a SQL Query:\n")
                 print((Fore.RESET if cm else ""))
 
                 if engine.quit(query, "Now leaving SQL mode."): 
                     print(command_list)
-                    continue
+                    break
             
                 try:
                     cursor.execute(query)
@@ -478,7 +478,7 @@ def edit_suppliers(conn, user):
                         else: 
                             id_found = True
 
-            #end get employee id
+            #end get supplier id
 
             new_values = new_values + "'" + str(new_id) + "', "
 

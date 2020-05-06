@@ -57,7 +57,7 @@ cursor = connection.cursor()
 
 
 ###################### DEBUGGING MODE #######################
-debugging = True
+debugging = False
 
 import os
 if debugging:
@@ -119,7 +119,7 @@ while not user_found:
         continue
 
     print("Username not found.")
-#
+#end while user not found
 
 
 #after username has been found, enter password
